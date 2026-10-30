@@ -8,7 +8,7 @@ from typing import Dict, List, Any
 
 
 def parse_terraform_plan(plan_data: Dict[str, Any]) -> Dict[str, List[str]]:
-    """Wertet resource_changes und resource_drift aus einem Terraform JSON-Plan aus."""
+    """Analyzes resource_changes and resource_drift from a Terraform JSON plan."""
     changes = {
         "create": [],
         "update": [],
@@ -16,7 +16,7 @@ def parse_terraform_plan(plan_data: Dict[str, Any]) -> Dict[str, List[str]]:
         "replace": [],
     }
 
-    # Kombiniere reguläre Plan-Abweichungen und explizite Resource-Drifts
+    # Combine regular plan changes and explicit resource drifts
     resource_items = plan_data.get("resource_changes", []) + plan_data.get("resource_drift", [])
     seen_addresses = set()
 
@@ -45,21 +45,21 @@ def parse_terraform_plan(plan_data: Dict[str, Any]) -> Dict[str, List[str]]:
 
 
 def build_markdown_report(changes: Dict[str, List[str]], project_name: str) -> str:
-    """Erstellt einen kompakten Markdown-Bericht für PRs, Issues oder Webhooks."""
+    """Generates a compact Markdown report for PRs, issues, or webhooks."""
     total = sum(len(v) for v in changes.values())
     if total == 0:
-        return f"### ✅ Kein Terraform-Drift erkannt (`{project_name}`)\nAlle Ressourcen sind synchron mit dem State."
+        return f"### ✅ No Terraform drift detected (`{project_name}`)\nAll resources are in sync with the state."
 
     lines = [
-        f"### ⚠️ Terraform Drift erkannt: `{project_name}`",
-        f"Es wurden **{total}** abweichende Ressourcen festgestellt:\n",
+        f"### ⚠️ Terraform Drift Detected: `{project_name}`",
+        f"Found **{total}** deviating resources:\n",
     ]
 
     labels = {
-        "replace": "🔄 Ersetzen (Destroy & Recreate)",
-        "delete": "❌ Löschen (Im Code entfernt / Manuell angelegt)",
-        "update": "✏️ Ändern (Out-of-Band Modifikation)",
-        "create": "➕ Erstellen (Manuell gelöscht / Neu im Code)",
+        "replace": "🔄 Replace (Destroy & Recreate)",
+        "delete": "❌ Delete (Removed from code / Manually created)",
+        "update": "✏️ Update (Out-of-band modification)",
+        "create": "➕ Create (Manually deleted / New in code)",
     }
 
     for key in ["replace", "delete", "update", "create"]:
@@ -74,7 +74,7 @@ def build_markdown_report(changes: Dict[str, List[str]], project_name: str) -> s
 
 
 def send_webhook(webhook_url: str, markdown_text: str, project_name: str) -> None:
-    """Sendet den Bericht an einen MS Teams, Slack oder Discord Webhook."""
+    """Sends the report to an MS Teams, Slack, or Discord webhook."""
     payload = {
         "text": markdown_text,
         "title": f"Terraform Drift Report: {project_name}",
@@ -84,12 +84,12 @@ def send_webhook(webhook_url: str, markdown_text: str, project_name: str) -> Non
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Analysiert Terraform JSON-Pläne auf Infrastruktur-Drifts.")
-    parser.add_argument("-f", "--file", required=True, help="Pfad zur Terraform Plan JSON-Datei")
-    parser.add_argument("-p", "--project", default=os.getenv("TF_PROJECT_NAME", "default-stack"), help="Projekt-/Stack-Name")
-    parser.add_argument("-w", "--webhook", default=os.getenv("DRIFT_WEBHOOK_URL"), help="Optionaler Webhook (Teams/Slack)")
-    parser.add_argument("-o", "--output", help="Optionaler Dateipfad für den Markdown-Report (z.B. drift-report.md)")
-    parser.add_argument("--fail-on-drift", action="store_true", help="Beendet das Skript mit Exit-Code 1, falls Drift vorliegt")
+    parser = argparse.ArgumentParser(description="Analyzes Terraform JSON plans for infrastructure drifts.")
+    parser.add_argument("-f", "--file", required=True, help="Path to the Terraform plan JSON file")
+    parser.add_argument("-p", "--project", default=os.getenv("TF_PROJECT_NAME", "default-stack"), help="Project/Stack name")
+    parser.add_argument("-w", "--webhook", default=os.getenv("DRIFT_WEBHOOK_URL"), help="Optional webhook URL (Teams/Slack)")
+    parser.add_argument("-o", "--output", help="Optional output file path for the markdown report (e.g. drift-report.md)")
+    parser.add_argument("--fail-on-drift", action="store_true", help="Exits with code 1 if any drift is detected")
 
     args = parser.parse_args()
 
@@ -97,7 +97,7 @@ def main():
         with open(args.file, "r", encoding="utf-8") as f:
             plan_data = json.load(f)
     except Exception as e:
-        print(f"[!] Fehler beim Laden der JSON-Plan-Datei: {e}", file=sys.stderr)
+        print(f"[!] Error loading JSON plan file: {e}", file=sys.stderr)
         sys.exit(2)
 
     changes = parse_terraform_plan(plan_data)
@@ -110,18 +110,18 @@ def main():
         try:
             with open(args.output, "w", encoding="utf-8") as out_f:
                 out_f.write(report)
-            print(f"\n[*] Bericht gespeichert unter: {args.output}")
+            print(f"\n[*] Report saved to: {args.output}")
         except Exception as e:
-            print(f"[!] Fehler beim Schreiben der Ausgabedatei: {e}", file=sys.stderr)
+            print(f"[!] Error writing output file: {e}", file=sys.stderr)
             sys.exit(2)
 
     if total_drifts > 0 and args.webhook:
         try:
-            print("[*] Sende Drift-Alarm an Webhook...")
+            print("[*] Sending drift alert to webhook...")
             send_webhook(args.webhook, report, args.project)
-            print("[✓] Webhook erfolgreich zugestellt.")
+            print("[✓] Webhook successfully delivered.")
         except requests.exceptions.RequestException as e:
-            print(f"[!] Fehler beim Senden des Webhooks: {e}", file=sys.stderr)
+            print(f"[!] Error sending webhook: {e}", file=sys.stderr)
             sys.exit(2)
 
     if total_drifts > 0 and args.fail_on_drift:
