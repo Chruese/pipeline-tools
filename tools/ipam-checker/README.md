@@ -1,15 +1,15 @@
 # IPAM YAML Validator
 
-Ein leichtgewichtiges CLI-Tool für CI/CD-Pipelines, das IP-Adressen und Subnetze aus deklarativen YAML-Dateien (z. B. Firewall- oder NSG-Regeln) extrahiert und gegen **NetBox** oder **EfficientIP SOLIDserver** validiert.
+A lightweight CLI tool for CI/CD pipelines that extracts IP addresses and subnets from declarative YAML files (e.g., firewall or NSG rules) and validates them against **NetBox** or **EfficientIP SOLIDserver**.
 
-Das Tool arbeitet nach dem Fail-Fast-Prinzip: Ist eine IP oder ein Subnetz nicht im IPAM registriert, bricht das Skript mit Exit-Code `1` ab, bevor nachgelagerte Schritte wie `terraform plan` oder `terraform apply` starten.
+The tool operates on a fail-fast principle: if an IP address or subnet is not registered in the IPAM, the script exits with code `1` before subsequent steps like `terraform plan` or `terraform apply` can start.
 
 ## Features
 
-- **Multi-Provider:** Unterstützt sowohl NetBox (`/api/ipam/`) als auch EfficientIP SOLIDserver (`/rest/`).
-- **Host & Subnetz-Erkennung:** Unterscheidet automatisch zwischen Einzel-IPs und CIDR-Subnetzen.
-- **Rekursives YAML-Parsing:** Findet IPv4- und IPv6-Adressen unabhängig von der Verschachtelungstiefe der YAML-Datei.
-- **CI/CD-Ready:** Steuerung komplett über Umgebungsvariablen oder CLI-Parameter möglich.
+- **Multi-Provider:** Supports both NetBox (`/api/ipam/`) and EfficientIP SOLIDserver (`/rest/`).
+- **Host & Subnet Detection:** Automatically distinguishes between single IPs and CIDR subnets.
+- **Recursive YAML Parsing:** Finds IPv4 and IPv6 addresses regardless of the nesting depth of the YAML file.
+- **CI/CD Ready:** Fully controllable via environment variables or CLI parameters.
 
 ## Installation
 
@@ -19,14 +19,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Verwendung
+## Usage
 
 ### 1. NetBox
 
 ```bash
 export IPAM_PROVIDER="netbox"
 export IPAM_URL="[https://netbox.example.com](https://netbox.example.com)"
-export IPAM_TOKEN="dein-api-token"
+export IPAM_TOKEN="your-api-token"
 
 python ipam_checker.py -f ./rules.yaml
 ```
@@ -37,30 +37,30 @@ python ipam_checker.py -f ./rules.yaml
 export IPAM_PROVIDER="efficientip"
 export IPAM_URL="[https://solidserver.example.com](https://solidserver.example.com)"
 export IPAM_USER="svc_pipeline"
-export IPAM_PASSWORD="dein-passwort"
+export IPAM_PASSWORD="your-password"
 
 python ipam_checker.py -f ./rules.yaml
 ```
 
-### CLI-Parameter
+### CLI Parameters
 
-- `-f`, `--file`: Pfad zur zu prüfenden YAML-Datei (Pflichtfeld)
-- `-p`, `--provider`: `netbox` oder `efficientip` (Standard: `netbox` oder `ENV: IPAM_PROVIDER`)
-- `--url`: Basis-URL des IPAM-Systems (`ENV: IPAM_URL`)
-- `--token`: API-Token für NetBox (`ENV: IPAM_TOKEN`)
-- `--user`: Benutzername für EfficientIP (`ENV: IPAM_USER`)
-- `--password`: Passwort für EfficientIP (`ENV: IPAM_PASSWORD`)
-- `--insecure`: Ignoriert selbstsignierte SSL-Zertifikate bei internen IPAM-Instanzen
+- `-f`, `--file`: Path to the YAML file to validate (Required)
+- `-p`, `--provider`: `netbox` or `efficientip` (Default: `netbox` or `ENV: IPAM_PROVIDER`)
+- `--url`: Base URL of the IPAM system (`ENV: IPAM_URL`)
+- `--token`: API token for NetBox (`ENV: IPAM_TOKEN`)
+- `--user`: Username for EfficientIP (`ENV: IPAM_USER`)
+- `--password`: Password for EfficientIP (`ENV: IPAM_PASSWORD`)
+- `--insecure`: Ignores self-signed SSL certificates for internal IPAM instances
 
-## Exit-Codes
+## Exit Codes
 
-| Code | Beschreibung |
+| Code | Description |
 | :--- | :--- |
-| `0` | Alle gefundenen IPs/Subnetze sind im IPAM registriert. |
-| `1` | Mindestens eine IP oder ein Subnetz wurde nicht im IPAM gefunden. |
-| `2` | Technischer Fehler (fehlende Credentials, YAML-Syntaxfehler oder API nicht erreichbar). |
+| `0` | All found IPs/subnets are registered in the IPAM. |
+| `1` | At least one IP or subnet was not found in the IPAM. |
+| `2` | Technical error (missing credentials, YAML syntax error, or API unreachable). |
 
-## Einbindung in GitHub Actions
+## Integration in GitHub Actions
 
 ```yaml
 - name: Validate IPs against IPAM
