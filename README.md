@@ -54,6 +54,51 @@ python <script-name>.py --help
 
 ---
 
+
+### Local Execution
+
+Scan a state file and print the text report to the console:
+```bash
+python main.py --state ./terraform.tfstate
+```
+
+Generate a Markdown report for documentation or Pull Requests:
+```bash
+python main.py --state ./terraform.tfstate --output report.md
+```
+
+### CLI Parameters
+
+- `--state`: Path to the Terraform state file (`.tfstate`) — **Required**
+- `--output`: Optional path to save the report. The format is automatically determined by the file extension (`.json`, `.md`, `.txt`).
+
+---
+
+## Exit Codes
+
+| Code | Description |
+| :--- | :--- |
+| `0` | Clean. No secrets found in the state file. |
+| `1` | Findings detected. One or more potential secrets were discovered. |
+| `2` | Error. State file not found, unreadable, or invalid JSON. |
+
+---
+
+## Integration in GitHub Actions
+
+```yaml
+- name: Scan Terraform State for Secrets
+  run: |
+    python tools/tf-state-analyzer/main.py \
+      --state ./terraform.tfstate \
+      --output $GITHUB_STEP_SUMMARY
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 ## 📄 License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
