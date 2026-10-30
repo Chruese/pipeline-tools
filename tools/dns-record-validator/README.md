@@ -1,14 +1,14 @@
 # DNS Record Validator
 
-Ein CLI-Tool für CI/CD-Pipelines, das definierte DNS-Einträge (`A`, `AAAA`, `CNAME`, `TXT`, `PTR`) aus einer YAML-Datei liest und gegen interne oder öffentliche Nameserver verifiziert.
+A CLI tool for CI/CD pipelines that reads defined DNS records (`A`, `AAAA`, `CNAME`, `TXT`, `PTR`) from a YAML file and verifies them against internal or public nameservers.
 
-Ideal für Pre-Flight-Checks vor Firewall- oder Infrastruktur-Deployments sowie für Post-Deployment-Verifizierungen von Private DNS Zones.
+Ideal for pre-flight checks before firewall or infrastructure deployments as well as post-deployment verification of private DNS zones.
 
 ## Features
 
-- **Unterstützte Record-Typen:** Prüft `A`, `AAAA`, `CNAME`, `TXT`, `MX` sowie Reverse-Lookups (`PTR`).
-- **Custom Nameserver:** Kann gezielt gegen interne Core-DNS-Server, Azure Private DNS Resolver oder öffentliche Resolver prüfen.
-- **Fail-Fast:** Bricht die Pipeline mit Exit-Code `1` ab, falls ein Hostname nicht auflösbar ist (`NXDOMAIN`) oder auf eine falsche IP zeigt.
+- **Supported Record Types:** Checks `A`, `AAAA`, `CNAME`, `TXT`, `MX`, and reverse lookups (`PTR`).
+- **Custom Nameserver:** Can specifically query internal core DNS servers, Azure Private DNS Resolvers, or public resolvers.
+- **Fail-Fast:** Fails the pipeline with exit code `1` if a hostname is unresolvable (`NXDOMAIN`) or points to an incorrect IP.
 
 ## Installation
 
@@ -18,7 +18,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## YAML-Format (`dns-records.yaml`)
+## YAML Format (`dns-records.yaml`)
 
 ```yaml
 records:
@@ -35,35 +35,35 @@ records:
     expected: "api.intern.example.com"
 ```
 
-## Verwendung
+## Usage
 
-### Standard-Auflösung (System-Resolver)
+### Standard Resolution (System Resolver)
 
 ```bash
 python dns_validator.py -f ./dns-records.yaml
 ```
 
-### Abfrage gegen spezifischen internen DNS-Server
+### Query Against a Specific Internal DNS Server
 
 ```bash
 python dns_validator.py -f ./dns-records.yaml --nameserver 10.100.0.4
 ```
 
-### CLI-Parameter
+### CLI Parameters
 
-- `-f`, `--file`: Pfad zur YAML-Datei mit den DNS-Regeln (Pflichtfeld)
-- `-n`, `--nameserver`: IP-Adresse eines spezifischen DNS-Servers (optional)
-- `-t`, `--timeout`: Timeout in Sekunden pro Abfrage (Standard: `5.0`)
+- `-f`, `--file`: Path to the YAML file containing DNS rules (Required)
+- `-n`, `--nameserver`: IP address of a specific DNS server (Optional)
+- `-t`, `--timeout`: Timeout in seconds per query (Default: `5.0`)
 
-## Exit-Codes
+## Exit Codes
 
-| Code | Beschreibung |
+| Code | Description |
 | :--- | :--- |
-| `0` | Alle DNS-Records existieren und entsprechen den erwarteten Werten. |
-| `1` | Mindestens ein DNS-Record weicht ab oder konnte nicht aufgelöst werden. |
-| `2` | Konfigurations- oder Dateifehler (YAML ungültig). |
+| `0` | All DNS records exist and match the expected values. |
+| `1` | At least one DNS record deviates or could not be resolved. |
+| `2` | Configuration or file error (invalid YAML). |
 
-## Einbindung in GitHub Actions
+## Integration in GitHub Actions
 
 ```yaml
 - name: Verify DNS Records
