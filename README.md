@@ -1,48 +1,48 @@
 # Pipeline Tools
 
-Eine zentrale Sammlung von CLI-Skripten, Validatoren und Automatisierungswerkzeugen, die gezielt für den Einsatz in CI/CD-Pipelines (z. B. GitHub Actions) und Plattform-Automatisierungen entwickelt wurden.
+A centralized collection of CLI scripts, validators, and automation utilities specifically designed for use in CI/CD pipelines (e.g., GitHub Actions) and platform automation.
 
-Das Ziel dieser Tools ist es, Fehler im deklarativen Infrastructure-as-Code (IaC) **„Shift-Left“** abzufangen – also noch vor dem eigentlichen Terraform-Ausführen (`plan` / `apply`).
+The goal of these tools is to catch errors in declarative Infrastructure-as-Code (IaC) via a **"Shift-Left"** approach—well before actual Terraform execution (`plan` / `apply`).
 
 ---
 
-## 📂 Repository-Struktur
+## 📂 Repository Structure
 
 ```text
 pipeline-tools/
 ├── tools/
-│   ├── ipam-checker/         # Prüft IP-Adressen gegen NetBox oder EfficientIP API
-│   ├── tf-drift-notifier/    # Analysiert Terraform JSON-Pläne auf manuelle Änderungen (Drifts)
-│   ├── dns-record-validator/ # Validiert DNS-Einträge gegen interne/externe Nameserver
-│   └── tf-state-analyzer/    # Analysiert Terraform State-Dateien auf Metriken und Größe
+│   ├── ipam-checker/         # Validates IP addresses against NetBox or EfficientIP API
+│   ├── tf-drift-notifier/    # Analyzes Terraform JSON plans for manual changes (drifts)
+│   ├── dns-record-validator/ # Validates DNS records against internal/external nameservers
+│   └── tf-state-analyzer/    # Analyzes Terraform state files for metrics and sizing
 └── README.md
 ```
 
 ---
 
-## 🛠️ Enthaltene Tools
+## 🛠️ Included Tools
 
 ### 1. `ipam-checker`
-Ein CI/CD-Validator, der IP-Adressen und Subnetze rekursiv aus deklarativen YAML-Dateien (z. B. Firewall- oder NSG-Regeln) extrahiert und gegen ein IPAM-System abgleicht.
-- **Provider:** NetBox, EfficientIP SOLIDserver
-- **Verhalten:** Bricht die Pipeline (`Exit-Code 1`) ab, wenn IPs nicht im IPAM registriert sind.
+A CI/CD validator that recursively extracts IP addresses and subnets from declarative YAML files (e.g., firewall or NSG rules) and checks them against an IPAM system.
+- **Providers:** NetBox, EfficientIP SOLIDserver
+- **Behavior:** Fails the pipeline (`Exit Code 1`) if any IP is not registered in the IPAM.
 
 ### 2. `tf-drift-notifier`
-Parst die JSON-Ausgabe eines `terraform plan` und bereitet manuelle Out-of-Band-Änderungen als übersichtlichen Markdown-Bericht auf (inklusive optionalem Webhook-Alarm für Teams/Slack).
+Parses the JSON output of a `terraform plan` and formats manual out-of-band changes into a clear Markdown report (including optional webhook alerts for Teams/Slack).
 
 ### 3. `dns-record-validator`
-Prüft definierte DNS-Einträge (`A`, `CNAME`, `PTR`, etc.) aus einer YAML-Konfiguration gegen spezifische Nameserver (z. B. interne Core-DNS-Server oder Azure Private Resolver), um Routing- und Namenskonflikte vorab zu verhindern.
+Checks defined DNS records (`A`, `CNAME`, `PTR`, etc.) from a YAML configuration against specific nameservers (e.g., internal core DNS servers or Azure Private Resolvers) to prevent routing and naming conflicts beforehand.
 
 ### 4. `tf-state-analyzer`
-Untersucht Terraform-State-Dateien, um die Ressourcendichte, den Blast-Radius und die Verteilung von Cloud-Ressourcen zu analysieren.
+Examines Terraform state files to analyze resource density, blast radius, and the distribution of cloud resources.
 
 ---
 
-## 🚀 Allgemeine Verwendung
+## 🚀 General Usage
 
-Jedes Tool liegt in einem eigenen Unterverzeichnis unter `tools/` und bringt eine eigene `requirements.txt` sowie Dokumentation mit.
+Each tool resides in its own subdirectory under `tools/` and includes a dedicated `requirements.txt` and documentation.
 
-Beispiel für die lokale Ausführung:
+Example for local execution:
 
 ```bash
 cd tools/<tool-name>
@@ -54,6 +54,6 @@ python <script-name>.py --help
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Dieses Projekt steht unter der MIT-Lizenz. Siehe [LICENSE](LICENSE) für Details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
