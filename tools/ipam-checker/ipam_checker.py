@@ -9,7 +9,7 @@ from typing import Set, Any
 
 
 def extract_ips_from_yaml(data: Any) -> Set[str]:
-    """Sucht rekursiv nach gültigen IPv4/IPv6-Adressen oder CIDRs in der YAML-Struktur."""
+    """Recursively searches for valid IPv4/IPv6 addresses or CIDRs in the YAML structure."""
     found_ips = set()
 
     if isinstance(data, dict):
@@ -30,7 +30,7 @@ def extract_ips_from_yaml(data: Any) -> Set[str]:
 
 
 def check_netbox(ip_str: str, base_url: str, token: str, verify_ssl: bool = True) -> bool:
-    """Prüft IP oder Subnetz gegen die NetBox REST API."""
+    """Checks IP or subnet against the NetBox REST API."""
     headers = {
         "Authorization": f"Token {token}",
         "Accept": "application/json",
@@ -52,7 +52,7 @@ def check_netbox(ip_str: str, base_url: str, token: str, verify_ssl: bool = True
 
 
 def check_efficientip(ip_str: str, base_url: str, user: str, password: str, verify_ssl: bool = True) -> bool:
-    """Prüft IP oder Subnetz gegen die EfficientIP SOLIDserver REST API."""
+    """Checks IP or subnet against the EfficientIP SOLIDserver REST API."""
     headers = {
         "X-IPM-Username": user,
         "X-IPM-Password": password,
@@ -86,19 +86,19 @@ def check_efficientip(ip_str: str, base_url: str, user: str, password: str, veri
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validiert IPs aus YAML-Dateien gegen NetBox oder EfficientIP.")
-    parser.add_argument("-f", "--file", required=True, help="Pfad zur YAML-Datei")
+    parser = argparse.ArgumentParser(description="Validates IPs from YAML files against NetBox or EfficientIP.")
+    parser.add_argument("-f", "--file", required=True, help="Path to the YAML file")
     parser.add_argument(
         "-p", "--provider",
         choices=["netbox", "efficientip"],
         default=os.getenv("IPAM_PROVIDER", "netbox"),
-        help="IPAM Provider: 'netbox' oder 'efficientip' (ENV: IPAM_PROVIDER)",
+        help="IPAM Provider: 'netbox' or 'efficientip' (ENV: IPAM_PROVIDER)",
     )
-    parser.add_argument("--url", default=os.getenv("IPAM_URL"), help="IPAM Basis-URL (ENV: IPAM_URL)")
-    parser.add_argument("--token", default=os.getenv("IPAM_TOKEN"), help="NetBox API-Token (ENV: IPAM_TOKEN)")
-    parser.add_argument("--user", default=os.getenv("IPAM_USER"), help="EfficientIP Username (ENV: IPAM_USER)")
-    parser.add_argument("--password", default=os.getenv("IPAM_PASSWORD"), help="EfficientIP Passwort (ENV: IPAM_PASSWORD)")
-    parser.add_argument("--insecure", action="store_true", help="SSL-Zertifikatsprüfung deaktivieren")
+    parser.add_argument("--url", default=os.getenv("IPAM_URL"), help="IPAM base URL (ENV: IPAM_URL)")
+    parser.add_argument("--token", default=os.getenv("IPAM_TOKEN"), help="NetBox API token (ENV: IPAM_TOKEN)")
+    parser.add_argument("--user", default=os.getenv("IPAM_USER"), help="EfficientIP username (ENV: IPAM_USER)")
+    parser.add_argument("--password", default=os.getenv("IPAM_PASSWORD"), help="EfficientIP password (ENV: IPAM_PASSWORD)")
+    parser.add_argument("--insecure", action="store_true", help="Disable SSL certificate verification")
 
     args = parser.parse_args()
     verify_ssl = not args.insecure
@@ -107,34 +107,34 @@ def main():
         requests.packages.urllib3.disable_warnings()
 
     if not args.url:
-        print("[!] Fehler: IPAM_URL (--url) muss angegeben werden.", file=sys.stderr)
+        print("[!] Error: IPAM_URL (--url) must be provided.", file=sys.stderr)
         sys.exit(2)
 
     if args.provider == "netbox" and not args.token:
-        print("[!] Fehler: Für NetBox wird IPAM_TOKEN (--token) benötigt.", file=sys.stderr)
+        print("[!] Error: NetBox requires IPAM_TOKEN (--token).", file=sys.stderr)
         sys.exit(2)
 
     if args.provider == "efficientip" and (not args.user or not args.password):
-        print("[!] Fehler: Für EfficientIP werden IPAM_USER und IPAM_PASSWORD benötigt.", file=sys.stderr)
+        print("[!] Error: EfficientIP requires IPAM_USER and IPAM_PASSWORD.", file=sys.stderr)
         sys.exit(2)
 
     try:
         with open(args.file, "r", encoding="utf-8") as f:
             yaml_content = yaml.safe_load(f)
     except Exception as e:
-        print(f"[!] Fehler beim Lesen der YAML-Datei: {e}", file=sys.stderr)
+        print(f"[!] Error reading YAML file: {e}", file=sys.stderr)
         sys.exit(2)
 
     ips_to_check = extract_ips_from_yaml(yaml_content)
     if not ips_to_check:
-        print("[+] Keine IP-Adressen in der YAML-Datei gefunden.")
+        print("[+] No IP addresses found in the YAML file.")
         sys.exit(0)
 
-    print(f"[*] Provider: {args.provider.upper()} | Gefundene Einträge: {len(ips_to_check)}")
+    print(f"[*] Provider: {args.provider.upper()} | Found entries: {len(ips_to_check)}")
 
     missing_ips = []
     for ip in sorted(ips_to_check):
-        print(f"[*] Prüfe {ip} ...", end=" ", flush=True)
+        print(f"[*] Checking {ip} ...", end=" ", flush=True)
         try:
             if args.provider == "netbox":
                 exists = check_netbox(ip, args.url, args.token, verify_ssl)
@@ -144,21 +144,21 @@ def main():
             if exists:
                 print("OK")
             else:
-                print("FEHLT")
+                print("MISSING")
                 missing_ips.append(ip)
         except requests.exceptions.RequestException as e:
-            print(f"API-FEHLER ({e})")
+            print(f"API-ERROR ({e})")
             sys.exit(2)
 
     if missing_ips:
-        print(f"\n[!] VALIDIERUNG FEHLGESCHLAGEN ({len(missing_ips)} nicht im IPAM gefunden):")
+        print(f"\n[!] VALIDATION FAILED ({len(missing_ips)} not found in IPAM):")
         for ip in missing_ips:
             print(f"  - {ip}")
         sys.exit(1)
 
-    print("\n[✓] Alle Einträge erfolgreich im IPAM verifiziert.")
+    print("\n[✓] All entries successfully verified in IPAM.")
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    main().
+    main()
