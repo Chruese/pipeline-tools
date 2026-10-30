@@ -85,7 +85,7 @@ def save_report(findings, output_path):
                 f.write(generate_markdown_report(findings))
             return True
         except Exception as e:
-            print(f"[ERROR] Konnte Markdown-Report nicht speichern: {e}")
+            print(f"[ERROR] Could not save Markdown report: {e}")
             return False
 
     elif ext == ".txt":
@@ -94,9 +94,9 @@ def save_report(findings, output_path):
                 f.write(generate_text_report(findings))
             return True
         except Exception as e:
-            print(f"[ERROR] Konnte Text-Report nicht speichern: {e}")
+            print(f"[ERROR] Could not save text report: {e}")
             return False
 
     else:
-        print(f"[ERROR] Unbekanntes Report-Format: {ext}")
+        print(f"[ERROR] Unknown report format: {ext}")
         return False
