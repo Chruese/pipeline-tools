@@ -1,13 +1,13 @@
 # Terraform Drift Notifier
 
-Ein leichtgewichtiges CLI-Tool für CI/CD-Pipelines, das die JSON-Ausgabe eines `terraform plan` analysiert, manuelle Cloud-Änderungen (Out-of-Band Drifts) erkennt und als übersichtlichen Markdown-Report oder Webhook-Alarm (MS Teams / Slack) ausgibt.
+A lightweight CLI tool for CI/CD pipelines that analyzes the JSON output of a `terraform plan`, detects manual cloud changes (out-of-band drifts), and outputs a clear Markdown report or webhook alert (MS Teams / Slack).
 
 ## Features
 
-- **Klare Kategorisierung:** Gruppiert Abweichungen nach `Replace`, `Delete`, `Update` und `Create`.
-- **Markdown-Export:** Generiert saubere Berichte für GitHub Step Summaries (`$GITHUB_STEP_SUMMARY`) oder Pull-Request-Kommentare.
-- **Webhook-Integration:** Sendet Benachrichtigungen nur dann, wenn tatsächlich ein Drift vorliegt.
-- **Pipeline-Steuerung:** Optionales `--fail-on-drift`-Flag, um geplante CI-Jobs bei Abweichungen gezielt als fehlgeschlagen zu markieren.
+- **Clear Categorization:** Groups deviations into `Replace`, `Delete`, `Update`, and `Create`.
+- **Markdown Export:** Generates clean reports for GitHub Step Summaries (`$GITHUB_STEP_SUMMARY`) or pull request comments.
+- **Webhook Integration:** Sends notifications only when a drift is actually detected.
+- **Pipeline Control:** Optional `--fail-on-drift` flag to intentionally fail scheduled CI jobs upon deviations.
 
 ## Installation
 
@@ -17,16 +17,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Verwendung
+## Usage
 
-### 1. Terraform Plan als JSON erzeugen
+### 1. Generate Terraform Plan as JSON
 
 ```bash
 terraform plan -out=tfplan
 terraform show -json tfplan > plan.json
 ```
 
-### 2. Drift-Analyse starten
+### 2. Run Drift Analysis
 
 ```bash
 python drift_notifier.py \
@@ -36,23 +36,23 @@ python drift_notifier.py \
   --fail-on-drift
 ```
 
-### CLI-Parameter
+### CLI Parameters
 
-- `-f`, `--file`: Pfad zur `plan.json`-Datei (Pflichtfeld)
-- `-p`, `--project`: Name des Terraform-Stacks (`ENV: TF_PROJECT_NAME`)
-- `-w`, `--webhook`: Webhook-URL für MS Teams / Slack (`ENV: DRIFT_WEBHOOK_URL`)
-- `-o`, `--output`: Speichert den Markdown-Bericht in einer Datei
-- `--fail-on-drift`: Gibt Exit-Code `1` zurück, sobald mindestens eine Abweichung erkannt wird
+- `-f`, `--file`: Path to the `plan.json` file (Required)
+- `-p`, `--project`: Name of the Terraform stack (`ENV: TF_PROJECT_NAME`)
+- `-w`, `--webhook`: Webhook URL for MS Teams / Slack (`ENV: DRIFT_WEBHOOK_URL`)
+- `-o`, `--output`: Saves the Markdown report to a file
+- `--fail-on-drift`: Returns exit code `1` as soon as at least one deviation is detected
 
-## Exit-Codes
+## Exit Codes
 
-| Code | Beschreibung |
+| Code | Description |
 | :--- | :--- |
-| `0` | Kein Drift erkannt (oder Drift erkannt ohne `--fail-on-drift`). |
-| `1` | Drift erkannt (in Verbindung mit `--fail-on-drift`). |
-| `2` | Technischer Fehler (Datei nicht lesbar, JSON ungültig, Webhook fehlgeschlagen). |
+| `0` | No drift detected (or drift detected without `--fail-on-drift`). |
+| `1` | Drift detected (in combination with `--fail-on-drift`). |
+| `2` | Technical error (file unreadable, invalid JSON, webhook failed). |
 
-## Einbindung in GitHub Actions (Nightly Drift Check)
+## Integration in GitHub Actions (Nightly Drift Check)
 
 ```yaml
 - name: Generate Terraform Plan JSON
