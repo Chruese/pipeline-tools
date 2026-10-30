@@ -8,7 +8,7 @@ from typing import List, Dict, Any
 
 
 def load_dns_config(file_path: str) -> List[Dict[str, Any]]:
-    """Lädt die erwarteten DNS-Einträge aus einer YAML-Datei."""
+    """Loads expected DNS records from a YAML file."""
     with open(file_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
@@ -17,7 +17,7 @@ def load_dns_config(file_path: str) -> List[Dict[str, Any]]:
     elif isinstance(data, list):
         return data
     else:
-        raise ValueError("YAML muss eine Liste von Einträgen oder einen 'records'-Schlüssel enthalten.")
+        raise ValueError("YAML must contain a list of entries or a 'records' key.")
 
 
 def verify_record(
@@ -26,7 +26,7 @@ def verify_record(
     expected_values: List[str],
     resolver: dns.resolver.Resolver,
 ) -> tuple[bool, List[str], str]:
-    """Prüft einen einzelnen DNS-Record gegen die erwarteten Zielwerte."""
+    """Verifies a single DNS record against the expected target values."""
     try:
         rtype = record_type.upper()
         if rtype == "PTR":
@@ -36,36 +36,36 @@ def verify_record(
             answers = resolver.resolve(fqdn, rtype)
 
         actual_values = [r.to_text().strip(".") for r in answers]
-        normalized_expected = [ str(v).strip(".") for v in expected_values ]
+        normalized_expected = [str(v).strip(".") for v in expected_values]
 
         missing = [val for val in normalized_expected if val not in actual_values]
         if missing:
-            return False, actual_values, f"Erwartet: {normalized_expected}, Gefunden: {actual_values}"
+            return False, actual_values, f"Expected: {normalized_expected}, Found: {actual_values}"
 
         return True, actual_values, "OK"
 
     except dns.resolver.NXDOMAIN:
-        return False, [], "NXDOMAIN (Domain existiert nicht)"
+        return False, [], "NXDOMAIN (Domain does not exist)"
     except dns.resolver.NoAnswer:
-        return False, [], f"Keine Antwort für Typ {record_type}"
+        return False, [], f"No answer for record type {record_type}"
     except dns.resolver.LifetimeTimeout:
-        return False, [], "DNS-Timeout"
+        return False, [], "DNS timeout"
     except Exception as e:
-        return False, [], f"Fehler: {e}"
+        return False, [], f"Error: {e}"
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Validiert DNS-Records aus einer YAML-Datei gegen reale Nameserver.")
-    parser.add_argument("-f", "--file", required=True, help="Pfad zur YAML-Datei mit den DNS-Definitionen")
-    parser.add_argument("-n", "--nameserver", help="Optionaler DNS-Server (z. B. 10.0.0.4 oder 8.8.8.8)")
-    parser.add_argument("-t", "--timeout", type=float, default=5.0, help="Timeout pro DNS-Abfrage in Sekunden")
+    parser = argparse.ArgumentParser(description="Validates DNS records from a YAML file against real nameservers.")
+    parser.add_argument("-f", "--file", required=True, help="Path to the YAML file with DNS definitions")
+    parser.add_argument("-n", "--nameserver", help="Optional DNS server (e.g. 10.0.0.4 or 8.8.8.8)")
+    parser.add_argument("-t", "--timeout", type=float, default=5.0, help="Timeout per DNS query in seconds")
 
     args = parser.parse_args()
 
     try:
         records = load_dns_config(args.file)
     except Exception as e:
-        print(f"[!] Fehler beim Lesen der YAML-Datei: {e}", file=sys.stderr)
+        print(f"[!] Error reading YAML file: {e}", file=sys.stderr)
         sys.exit(2)
 
     resolver = dns.resolver.Resolver()
@@ -74,9 +74,9 @@ def main():
 
     if args.nameserver:
         resolver.nameservers = [args.nameserver]
-        print(f"[*] Verwende benutzerdefinierten Nameserver: {args.nameserver}")
+        print(f"[*] Using custom nameserver: {args.nameserver}")
 
-    print(f"[*] Prüfe {len(records)} DNS-Einträge...\n")
+    print(f"[*] Checking {len(records)} DNS records...\n")
 
     failed_records = []
 
@@ -86,7 +86,7 @@ def main():
         expected = entry.get("expected") or entry.get("target") or entry.get("value")
 
         if not fqdn or not expected:
-            print(f"[!] Überspringe unvollständigen Eintrag: {entry}", file=sys.stderr)
+            print(f"[!] Skipping incomplete entry: {entry}", file=sys.stderr)
             continue
 
         expected_list = expected if isinstance(expected, list) else [str(expected)]
@@ -97,16 +97,16 @@ def main():
         if success:
             print("OK")
         else:
-            print(f"FEHLER ({message})")
+            print(f"FAILED ({message})")
             failed_records.append(f"{fqdn} [{rtype}]: {message}")
 
     if failed_records:
-        print(f"\n[!] DNS-VALIDIERUNG FEHLGESCHLAGEN ({len(failed_records)} Fehler):")
+        print(f"\n[!] DNS VALIDATION FAILED ({len(failed_records)} errors):")
         for fail in failed_records:
             print(f"  - {fail}")
         sys.exit(1)
 
-    print("\n[✓] Alle DNS-Einträge wurden erfolgreich aufgelöst und verifiziert.")
+    print("\n[✓] All DNS records successfully resolved and verified.")
     sys.exit(0)
 
 
