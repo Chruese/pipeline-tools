@@ -1,0 +1,22 @@
+# naming-conventions.yaml
+rules:
+  azurerm_resource_group:
+    pattern: "^rg-[a-z0-9]+-(weu|gwc)-[0-9]{3}$"
+    example: "rg-corenetwork-weu-001"
+  
+  azurerm_virtual_network:
+    pattern: "^vnet-[a-z0-9]+-(weu|gwc)-[0-9]{3}$"
+    example: "vnet-prod-weu-001"
+
+  azurerm_subnet:
+    pattern: "^snet-[a-z0-9]+-(weu|gwc)-[0-9]{3}$"
+    example: "snet-frontend-weu-001"
+
+  azurerm_firewall:
+    pattern: "^afw-[a-z0-9]+-(weu|gwc)-[0-9]{3}$"
+    example: "afw-hub-weu-001"
+
+  azurerm_storage_account:
+    # Storage Accounts in Azure must only contain lowercase letters and numbers (3-24 characters)
+    pattern: "^st[a-z0-9]{3,22}$"
+    example: "stprodcorelogs001"
