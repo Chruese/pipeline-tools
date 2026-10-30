@@ -46,11 +46,11 @@ SECRET_KEYWORDS = [
 # ---------------------------------------------------------
 
 SECRET_REGEX = [
-    r"AKIA[0-9A-Z]{16}",                     # AWS Access Key
-    r"AIza[0-9A-Za-z\-_]{35}",               # Google API Key
-    r"ghp_[0-9A-Za-z]{36}",                  # GitHub Token
-    r"-----BEGIN PRIVATE KEY-----",          # Private Key
-    r"[A-Za-z0-9+/]{20,}={0,2}",             # Base64 Blob
+    r"AKIA[0-9A-Z]{16}",                  # AWS Access Key
+    r"AIza[0-9A-Za-z\-_]{35}",              # Google API Key
+    r"ghp_[0-9A-Za-z]{36}",                 # GitHub Token
+    r"-----BEGIN PRIVATE KEY-----",         # Private Key
+    r"[A-Za-z0-9+/]{20,}={0,2}",            # Base64 Blob
 ]
 
 # ---------------------------------------------------------
@@ -70,7 +70,7 @@ AZURE_KEY_HINTS = [
 def is_secret(key, value):
     """Checks if a key/value pair contains a secret."""
 
-    # Key ignorieren?
+    # Ignore key?
     if key in IGNORE_KEYS:
         return False
 
@@ -81,7 +81,7 @@ def is_secret(key, value):
             if kw in key_lower:
                 return True
 
-    # Value muss String sein
+    # Value must be a string
     if not isinstance(value, str):
         return False
 
