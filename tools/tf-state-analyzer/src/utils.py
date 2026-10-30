@@ -26,11 +26,11 @@ def walk_state(data, path=""):
         for key, value in data.items():
             new_path = f"{path}.{key}" if path else key
 
-            # If the value is a dict or list again → recurse further
+            # If the value is a dict or list again -> recurse further
             if isinstance(value, (dict, list)):
                 yield from walk_state(value, new_path)
             else:
-                # Primitive values → yield directly
+                # Primitive values -> yield directly
                 yield new_path, key, value
 
     # ---------------------------------------------------------
@@ -48,7 +48,7 @@ def walk_state(data, path=""):
 
     # ---------------------------------------------------------
     # 3. Ignore primitive values
-    # (werden nur in Dict/List verarbeitet)
+    # (processed only within dict/list)
     # ---------------------------------------------------------
     else:
         return
