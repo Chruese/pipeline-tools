@@ -9,6 +9,7 @@ from .models import TicketPolicy
 from .topology import verify_cidrs_against_registry
 from .compilers.azure import build_azure_rcg
 from .interactive import run_wizard
+from .compilers.checkpoint import build_checkpoint_payload
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s")
 logger = logging.getLogger("fw-orchestrator")
@@ -53,6 +54,13 @@ def compile_cmd(args: argparse.Namespace) -> int:
     
     logger.info(f"Kompilierung abgeschlossen: {out_file}")
     return 2 if requires_secops else 0
+
+    # Compile Check Point
+    cp_payload = build_checkpoint_payload(tickets, registry_units, env)
+    cp_file = build_dir / f"checkpoint_{env}_payload.json"
+    cp_file.write_text(json.dumps(cp_payload, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    logger.info(f"Kompilierung abgeschlossen: {az_file} & {cp_file}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="fw-tool", description="Firewall Policy Orchestrator CLI")
